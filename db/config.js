@@ -1,18 +1,22 @@
-const path = require('path');
+require('dotenv').config({ path: '../.env'});
 
-// TODO: Load through environment variables
+const host = process.env['DB_HOST'];
+const user = process.env['DB_USER'];
+const password = process.env['DB_PASS'];
+const database = process.env['DB_NAME'];
+
 module.exports = {
   client: 'pg',
   connection: {
-    host     : '127.0.0.1',
-    user     : 'postgres',
-    password : '',
-    database : 'swpc',
+    host     : host,
+    user     : user,
+    password : password,
+    database : database,
     charset  : 'utf8'
   },
   acquireConnectionTimeout: 60000,
   migrations: {
-    tablename: 'migrations',
-    directory: path.resolve('./migrations')
+    tableName: 'migrations',
+    directory: './migrations'
   }
 };
