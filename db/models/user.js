@@ -1,5 +1,6 @@
 const bookshelf = require('../bookshelf');
 const hashHelpers = require('../../util/hash');
+const Promise = require('bluebird');
 
 const User = bookshelf.Model.extend({
   tableName: 'users',
@@ -18,11 +19,11 @@ const User = bookshelf.Model.extend({
   },
 
   login: async function(email, password) {
-    const user = await new this({ email }).fetch();
+    const user = await new this({ email }).fetch({ require: true });
     const hash = user.get('password');
     const validPassword = await hashHelpers.compare(password, hash);
     if(!validPassword) {
-      throw new Error('Invalid Password');
+      return Promise.reject(new this.NotFoundError());
     }
 
     return user;
