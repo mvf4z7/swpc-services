@@ -8,8 +8,6 @@ const jwt = require('jsonwebtoken');
 
 /* GET home page. */
 router.get('/api', requireAuth(), function(req, res, next) {
-  // res.render('index', { title: 'Express' });
-
   res.send(req.user);
 });
 
@@ -35,7 +33,7 @@ router.post('/login', async function(req, res, next) {
 
 router.post('/token', function(req, res, next) {
   const key = process.env['JWT_KEY'];
-  const token = jwt.sign({ userId: 1, }, key, { jwtid: '123' });
+  const token = jwt.sign({ userId: 1, }, key);
   res.send(token);
 
   // TODO:

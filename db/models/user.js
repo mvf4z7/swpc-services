@@ -1,10 +1,27 @@
 const bookshelf = require('../bookshelf');
 const hashHelpers = require('../../util/hash');
-const Promise = require('bluebird');
+const jwt = require('jsonwebtoken');
+const uuid = require('uuid/v4');
+
+const Token = require('./token');
 
 const User = bookshelf.Model.extend({
   tableName: 'users',
   hasTimestamps: true,
+
+  tokens: function() {
+    return this.hasMany('Token');
+  },
+
+  createToken: async function() {
+    const tokenRow = await this.related('tokens').create();
+    const data = {
+      userId: this.get('id'),
+      tokenId: tokenRow.get('id')
+    };
+    const key = process.env['JWT_KEY'];
+    return jwt.sign(data, key);
+  }
 }, {
   createAccount: async function(email, password) {
     const emailLower = email.toLowerCase();
@@ -30,4 +47,4 @@ const User = bookshelf.Model.extend({
   }
 });
 
-module.exports = User;
+module.exports = bookshelf.model('User', User);

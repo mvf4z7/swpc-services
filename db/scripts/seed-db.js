@@ -1,12 +1,9 @@
 require('dotenv').config();
-const createDb = require('./create-db.js');
-const dropDb = require('./drop-db.js');
+const createDb = require('./create-db');
+const dropDb = require('./drop-db');
+const migrateDb = require('./migrate-db');
 
 const database = process.env['DB_NAME'];
-
-function seedDb() {
-  return Promise.resolve();
-}
 
 dropDb(database)
   .then( () => {
@@ -15,8 +12,16 @@ dropDb(database)
   })
   .then( () => {
     console.log(`${database} database created`)
-    return seedDb();
+    return migrateDb();
+  })
+  .then( () => {
+    console.log(`${database} database migrated`);
+  })
+  .then( () => {
+    const User = require('../models/user');
+    return User.createAccount('test@email.com', 'password');
   })
   .then( () => {
     console.log(`${database} database seeded`);
+    process.exit(0);
   });

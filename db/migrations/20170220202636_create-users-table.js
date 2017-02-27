@@ -6,7 +6,6 @@ exports.up = function(knex, Promise) {
     table.string('email');
     table.string('password');
     table.enu('type', ['standard', 'admin']);
-    table.uuid('uuid');
   })
   .then(function () {
    console.log('users table was created');
