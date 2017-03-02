@@ -21,7 +21,8 @@ router.post('/login', async function(req, res, next) {
   const password = req.body.password;
   try {
     const user = await User.login(email, password);
-    res.send(user.serialize());
+    const token = await user.createToken();
+    res.send({ token });
   } catch(error) {
     if(error instanceof User.NotFoundError) {
       next(Boom.unauthorized('Invalid username or password'));
