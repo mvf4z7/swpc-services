@@ -19,6 +19,8 @@ router.get('/api', requireAuth(), function(req, res, next) {
 router.post('/login', async function(req, res, next) {
   const email = req.body.email;
   const password = req.body.password;
+
+  console.log(req.body);
   try {
     const user = await User.login(email, password);
     const token = await user.createToken();
