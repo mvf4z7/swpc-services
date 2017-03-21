@@ -3,8 +3,7 @@ const osmosis = require('osmosis');
 const URL = 'https://www.southwest.com';
 const FORM_SELECTOR = 'form#booking-form--flight-panel';
 const OUTBOUND_FARES_SELECTOR = '#faresOutbound .product_price';
-// const RETURN_FARES_SELECTOR = '#faresReturn .product_price';
-const RETURN_FARES_SELECTOR = '#faresReturn .product_price, #b1Table span.var.h5';
+const RETURN_FARES_SELECTOR = '#faresReturn .product_price';
 
 const staticOptions = {
   returnAirport: '',
@@ -29,52 +28,72 @@ const staticOptions = {
 */
 
 function fetchPrices(options) {
-  // const formData = {
-  //   ...options,
-  //   ...staticOptions
-  // };
-
-  const formData = Object.assign({}, options, staticOptions);
-  console.log(formData);
-
   const outboundFares = [];
   const returnFares = [];
+  const formData = Object.assign({}, options, staticOptions);
+
+  return new Promise( (resolve, reject) => {
+    osmosis
+      .get(URL)
+      .submit(FORM_SELECTOR, formData)
+      .then(function(context, data, next) {
+        const outboundMarkup = context.find(OUTBOUND_FARES_SELECTOR);
+        outboundMarkup.forEach( item => {
+          const price = parsePriceMarkup(item);
+          outboundFares.push(price)
+          next(context, data);
+        });
+
+        if(options.twoWayTrip) {
+          const returnMarkup = context.find(RETURN_FARES_SELECTOR);
+          returnMarkup.forEach( item => {
+            const price = parsePriceMarkup(item);
+            returnFares.push(price);
+            next(context, data);
+          });
+        }
+      })
+      .done( () => {
+        resolve({
+          outboundFares,
+          returnFares
+        });
+      })
+      .error(reject);
+  });
 
   return osmosis
     .get(URL)
     .submit(FORM_SELECTOR, formData)
-    .find(OUTBOUND_FARES_SELECTOR)
-    .then( (priceMarkup) => {
-      // const matches = priceMarkup.toString().match(/\$.*?(\d+)/)
-      // console.log(`0: ${matches[0]}   1: ${matches[1]} `);
-      const price = parsePriceMarkup(priceMarkup);
-      outboundFares.push(price);
-      // console.log(typeof matches);
-      // console.log(priceMarkup.toString());
-    })
-    .find(RETURN_FARES_SELECTOR)
-    .then( (priceMarkup) => {
-      if(!options.twoWayTrip) {
-        return;
-      }
+    .then(function(context, data, next) {
+      const outboundMarkup = context.find(OUTBOUND_FARES_SELECTOR);
+      outboundMarkup.forEach( item => {
+        const price = parsePriceMarkup(item);
+        outboundFares.push(price)
+        next(context, data);
+      });
 
-      const price = parsePriceMarkup(priceMarkup);
-      returnFares.push(price);
+      if(options.twoWayTrip) {
+        const returnMarkup = context.find(RETURN_FARES_SELECTOR);
+        returnMarkup.forEach( item => {
+          const price = parsePriceMarkup(item);
+          returnFares.push(price);
+          next(context, data);
+        });
+      }
     })
     .done( () => {
-      // console.log('outbound');
-      // console.log(outboundFares.length);
-      // console.log('\n\n\n\nreturn');
-      console.log(returnFares.length);
-      // returnFares.forEach(console.log);
+      return Promise.resolve({
+        outboundFares,
+        returnFares
+      });
     });
-
 }
 
 function parsePriceMarkup(markup) {
   const matches = markup.toString().match(/\$.*?(\d+)/);
   if(matches.length >= 2) {
-    return matches[1];
+    return parseInt(matches[1]);
   } else {
     return undefined;
   }
@@ -89,8 +108,8 @@ const testInput = {
   adultPassengerCount: 1
 };
 
-fetchPrices(testInput);
+fetchPrices(testInput)
+  .then( data => {
+    console.log(data);
+  });
 
-// osmosis
-//   .get('https://www.google.com')
-//   .log(console.log);
