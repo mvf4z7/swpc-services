@@ -38,6 +38,10 @@ function fetchPrices(options) {
       .submit(FORM_SELECTOR, formData)
       .then(function(context, data, next) {
         const outboundMarkup = context.find(OUTBOUND_FARES_SELECTOR);
+        if(outboundMarkup.length === 0) {
+          reject(new Error('No outbound markup found.'));
+        }
+
         outboundMarkup.forEach( item => {
           const price = parsePriceMarkup(item);
           outboundFares.push(price)
@@ -46,6 +50,10 @@ function fetchPrices(options) {
 
         if(options.twoWayTrip) {
           const returnMarkup = context.find(RETURN_FARES_SELECTOR);
+          if(outboundMarkup.length === 0) {
+            reject(new Error('No return markup found.'));
+          }
+
           returnMarkup.forEach( item => {
             const price = parsePriceMarkup(item);
             returnFares.push(price);
@@ -58,36 +66,8 @@ function fetchPrices(options) {
           outboundFares,
           returnFares
         });
-      })
-      .error(reject);
+      });
   });
-
-  return osmosis
-    .get(URL)
-    .submit(FORM_SELECTOR, formData)
-    .then(function(context, data, next) {
-      const outboundMarkup = context.find(OUTBOUND_FARES_SELECTOR);
-      outboundMarkup.forEach( item => {
-        const price = parsePriceMarkup(item);
-        outboundFares.push(price)
-        next(context, data);
-      });
-
-      if(options.twoWayTrip) {
-        const returnMarkup = context.find(RETURN_FARES_SELECTOR);
-        returnMarkup.forEach( item => {
-          const price = parsePriceMarkup(item);
-          returnFares.push(price);
-          next(context, data);
-        });
-      }
-    })
-    .done( () => {
-      return Promise.resolve({
-        outboundFares,
-        returnFares
-      });
-    });
 }
 
 function parsePriceMarkup(markup) {
@@ -103,13 +83,16 @@ const testInput = {
   twoWayTrip: true,
   originAirport: 'MDW',
   destinationAirport: 'LAX',
-  outboundDateString: '03/21/2017',
-  returnDateString: '03/23/2017',
+  outboundDateString: '04/03/2017',
+  returnDateString: '05/04/2017',
   adultPassengerCount: 1
 };
 
 fetchPrices(testInput)
   .then( data => {
     console.log(data);
+  })
+  .catch( e => {
+    console.error(e);
   });
 
