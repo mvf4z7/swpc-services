@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const uuid = require('uuid/v4');
 
 const Token = require('./token');
+const Itinerary = require('./itinerary');
 
 const User = bookshelf.Model.extend({
   tableName: 'users',
@@ -11,6 +12,10 @@ const User = bookshelf.Model.extend({
 
   tokens: function() {
     return this.hasMany('Token');
+  },
+
+  itineraries: function() {
+    return this.hasMany('Itinerary')
   },
 
   createToken: async function() {

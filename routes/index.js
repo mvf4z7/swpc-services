@@ -6,21 +6,23 @@ const User = require('../db/models/user');
 const requireAuth = require('../middleware/authentication').requireAuth;
 const jwt = require('jsonwebtoken');
 
-/* GET home page. */
-router.get('/api', requireAuth(), function(req, res, next) {
+// Handlers
+const createItinerary = require('../handlers/itineraries/create');
+const listItineraries = require('../handlers/itineraries/list');
+const getItinerary = require('../handlers/itineraries/get');
+
+router.get('/api/user', requireAuth(), function(req, res, next) {
   res.send(req.user);
 });
 
-
-/*
- * 1.
-*/
+router.post('/api/itineraries/', requireAuth(), createItinerary);
+router.get('/api/itineraries/', requireAuth(), listItineraries);
+router.get('/api/itineraries/:id/', requireAuth(), getItinerary);
 
 router.post('/login', async function(req, res, next) {
   const email = req.body.email;
   const password = req.body.password;
 
-  console.log(req.body);
   try {
     const user = await User.login(email, password);
     const token = await user.createToken();
@@ -32,20 +34,6 @@ router.post('/login', async function(req, res, next) {
       next(error);
     }
   }
-});
-
-router.post('/token', function(req, res, next) {
-  const key = process.env['JWT_KEY'];
-  const token = jwt.sign({ userId: 1, }, key);
-  res.send(token);
-
-  // TODO:
-  /*
-   * 1. Check user credentials and get user row from DB
-   * 2. Create a UUID, and include in the jwt payload with the userId
-   * 3. send back the JWT
-   *
-  */
 });
 
 module.exports = router;
