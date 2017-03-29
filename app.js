@@ -8,6 +8,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var Boom = require('boom');
+var Celebrate = require('celebrate');
 var cors = require('cors');
 
 var routes = require('./routes');
@@ -33,7 +34,10 @@ app.use(function(req, res, next) {
   next(boom);
 });
 
-// Error handler
+// Catch validation errors
+app.use(Celebrate.errors());
+
+// General error handler
 app.use(function(error, req, res, next) {
   if(!error.isBoom) {
     error = Boom.wrap(error, 500);

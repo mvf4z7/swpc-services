@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwtAuth = require('../middleware/authentication').requireAuth;
+const Celebrate = require('celebrate');
 
 // require JWT authentication for all routes
 router.use(jwtAuth());
@@ -13,6 +14,6 @@ router.get('/user', user.get);
 const itineraries = require('../handlers/itineraries');
 router.get('/itineraries/', itineraries.list);
 router.post('/itineraries/', itineraries.create);
-router.get('/itineraries/:id/', itineraries.get);
+router.get('/itineraries/:id/', Celebrate(itineraries.get.validation), itineraries.get.handler);
 
 module.exports = router;
