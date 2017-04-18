@@ -14,6 +14,7 @@ async function getItinerary(req, res, next) {
 
   try {
     const itinerary = await Itinerary.forge({ id: itineraryId, user_id: user.id }).fetch({ require: true });
+    console.log(itinerary.serialize());
     res.send(itinerary);
   } catch(error) {
     if(error instanceof Itinerary.NotFoundError) {
