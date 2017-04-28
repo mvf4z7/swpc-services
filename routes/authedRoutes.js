@@ -12,8 +12,10 @@ router.get('/user', user.get);
 
 // itineraries routes
 const itineraries = require('../handlers/itineraries');
+console.log(itineraries.update.handler);
 router.get('/itineraries/', itineraries.list);
 router.post('/itineraries/', itineraries.create);
 router.get('/itineraries/:id/', Celebrate(itineraries.get.validation), itineraries.get.handler);
+router.put('/itineraries/:id/', itineraries.update.handler);
 
 module.exports = router;
