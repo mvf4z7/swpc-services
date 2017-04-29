@@ -15,19 +15,24 @@ const fields = [
 
 async function updateItinerary(req, res, next) {
   const userId = req.user.id;
-  const itineraryId = req.params.id;
+  const itineraryId = parseInt(req.params.id, 10);
   const updates = _.pick(req.body, fields);
   const options = { 
     require: true,
     method: 'update',
+    patch: true,
   };
 
   try {
     const result = await Itinerary
       .forge({ id: itineraryId, user_id: userId })
-      .save(updates, options);
-    res.status(204).send();
+      .save(updates, options)
+      .then( model => {
+        return model.fetch();
+      });
+    res.send(result);
   } catch(error) {
+    console.error
     if(error instanceof Itinerary.NoRowsUpdatedError) {
       next(Boom.badRequest('Invalid itinerary id'));
     }
